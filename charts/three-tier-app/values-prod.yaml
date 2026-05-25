@@ -1,0 +1,69 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Production Values — Used when deploying to EKS or production Kubernetes.
+#
+# Key differences from staging:
+#   - Higher replica counts
+#   - HPA autoscaling enabled
+#   - More MongoDB storage
+#   - Stricter CORS
+#   - Production ingress host
+# ─────────────────────────────────────────────────────────────────────────────
+
+global:
+  environment: production
+
+frontend:
+  image:
+    repository: rohankhanal14/crud-frontend
+    tag: "latest"
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilization: 75
+    targetMemoryUtilization: 80
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+backend:
+  image:
+    repository: rohankhanal14/crud-backend
+    tag: "latest"
+  replicaCount: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilization: 70
+    targetMemoryUtilization: 75
+  env:
+    corsOrigin: "https://crud.yourdomain.com"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+mongodb:
+  storage: 20Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+ingress:
+  host: crud.yourdomain.com
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod

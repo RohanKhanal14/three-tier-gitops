@@ -1,0 +1,28 @@
+{{/*
+─────────────────────────────────────────────────────────────────────────────
+  MongoDB Headless Service
+  Headless service (clusterIP: None) for StatefulSet DNS resolution.
+  Backend connects to mongodb://mongodb:27017
+─────────────────────────────────────────────────────────────────────────────
+*/}}
+{{- if .Values.mongodb.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: mongodb
+    component: database
+    environment: {{ .Values.global.environment }}
+spec:
+  type: ClusterIP
+  clusterIP: None    # Headless service for StatefulSet
+  selector:
+    app: mongodb
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017
+      protocol: TCP
+{{- end }}

@@ -1,0 +1,106 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Base values for three-tier-app Helm chart
+# Jenkins CI updates image tags in values-staging.yaml / values-prod.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+
+global:
+  environment: staging
+  imagePullPolicy: IfNotPresent
+
+# ── Frontend (React + Nginx) ────────────────────────────────────────────────
+frontend:
+  enabled: true
+  image:
+    repository: ""       # Jenkins sets this via values-staging.yaml
+    tag: ""              # Jenkins sets this via values-staging.yaml
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilization: 80
+    targetMemoryUtilization: 85
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ── Backend (Node.js + Express) ─────────────────────────────────────────────
+backend:
+  enabled: true
+  image:
+    repository: ""       # Jenkins sets this via values-staging.yaml
+    tag: ""              # Jenkins sets this via values-staging.yaml
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 5000
+    targetPort: 5000
+  env:
+    nodeEnv: production
+    port: "5000"
+    mongoDatabase: crudapp
+    corsOrigin: "*"
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilization: 75
+    targetMemoryUtilization: 80
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# ── MongoDB ─────────────────────────────────────────────────────────────────
+mongodb:
+  enabled: true
+  image: mongo:7
+  storage: 5Gi
+  storageClassName: standard      # Minikube default
+  auth:
+    rootUsername: root
+    rootPassword: rootpassword    # Override via Kubernetes Secret in production
+    database: crudapp
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ── Ingress ─────────────────────────────────────────────────────────────────
+ingress:
+  enabled: true
+  className: nginx
+  host: staging.crud.local
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+
+# ── ServiceMonitor (Prometheus) ─────────────────────────────────────────────
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  labels:
+    release: kube-prometheus-stack

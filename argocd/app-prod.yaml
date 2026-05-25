@@ -1,0 +1,59 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Argo CD Application — Production Environment
+#
+# Key differences from staging:
+#   - Uses values-prod.yaml (higher replicas, HPA enabled, more resources)
+#   - Auto-sync DISABLED — requires manual approval before deploy
+#   - selfHeal enabled to prevent config drift after approved deploy
+#
+# Apply with:
+#   kubectl apply -f argocd/app-prod.yaml
+#
+# To sync manually:
+#   argocd app sync three-tier-production
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: three-tier-production
+  namespace: argocd
+  labels:
+    environment: production
+    app.kubernetes.io/part-of: three-tier-app
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: devops-alerts
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/YOUR_ORG/three-tier-gitops.git
+    targetRevision: main
+    path: charts/three-tier-app
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: three-tier-production
+
+  syncPolicy:
+    # ⚠️  Auto-sync is DISABLED for production — requires manual approval
+    # automated:
+    #   prune: true
+    #   selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PruneLast=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        maxDuration: 5m
+        factor: 2

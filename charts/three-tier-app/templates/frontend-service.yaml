@@ -1,0 +1,25 @@
+{{/*
+─────────────────────────────────────────────────────────────────────────────
+  Frontend Service
+─────────────────────────────────────────────────────────────────────────────
+*/}}
+{{- if .Values.frontend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: three-tier-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: three-tier-frontend
+    component: frontend
+    environment: {{ .Values.global.environment }}
+spec:
+  type: {{ .Values.frontend.service.type | default "ClusterIP" }}
+  selector:
+    app: three-tier-frontend
+  ports:
+    - name: http
+      port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
+      protocol: TCP
+{{- end }}

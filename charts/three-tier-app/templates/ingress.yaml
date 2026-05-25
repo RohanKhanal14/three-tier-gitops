@@ -1,0 +1,65 @@
+{{/*
+─────────────────────────────────────────────────────────────────────────────
+  Ingress — Routes traffic to frontend and backend via Nginx Ingress
+  
+  Routing:
+    /api/*  → three-tier-backend:5000
+    /*      → three-tier-frontend:80
+  
+  Add to /etc/hosts on your machine:
+    <MINIKUBE-IP>  staging.crud.local
+─────────────────────────────────────────────────────────────────────────────
+*/}}
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: three-tier-ingress
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: three-tier-app
+    environment: {{ .Values.global.environment }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          # API routes → backend service
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: three-tier-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          # Health and metrics endpoints → backend
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: three-tier-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /metrics
+            pathType: Exact
+            backend:
+              service:
+                name: three-tier-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          # Everything else → frontend (React SPA)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: three-tier-frontend
+                port:
+                  number: {{ .Values.frontend.service.port }}
+{{- end }}

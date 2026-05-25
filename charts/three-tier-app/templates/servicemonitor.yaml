@@ -1,0 +1,35 @@
+{{/*
+─────────────────────────────────────────────────────────────────────────────
+  ServiceMonitor — Backend Prometheus Metrics
+  Tells kube-prometheus-stack to scrape the backend's /metrics endpoint.
+  
+  IMPORTANT: The label "release: kube-prometheus-stack" MUST match the
+  Helm release name used when installing the Prometheus stack.
+─────────────────────────────────────────────────────────────────────────────
+*/}}
+{{- if and .Values.backend.enabled .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: three-tier-backend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: three-tier-backend
+    component: backend
+    environment: {{ .Values.global.environment }}
+    {{- range $key, $value := .Values.serviceMonitor.labels }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: three-tier-backend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+{{- end }}

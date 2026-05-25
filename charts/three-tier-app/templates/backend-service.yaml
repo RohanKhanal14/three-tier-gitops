@@ -1,0 +1,25 @@
+{{/*
+─────────────────────────────────────────────────────────────────────────────
+  Backend Service
+─────────────────────────────────────────────────────────────────────────────
+*/}}
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: three-tier-backend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: three-tier-backend
+    component: backend
+    environment: {{ .Values.global.environment }}
+spec:
+  type: {{ .Values.backend.service.type | default "ClusterIP" }}
+  selector:
+    app: three-tier-backend
+  ports:
+    - name: http
+      port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.targetPort }}
+      protocol: TCP
+{{- end }}
