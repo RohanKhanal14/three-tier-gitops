@@ -7,23 +7,19 @@
 
 global:
   environment: staging
-
 frontend:
   image:
     repository: rohankhanal14/crud-frontend
-    tag: "latest"   # ← Jenkins CI writes: "<BUILD_NUMBER>-<GIT_SHORT_SHA>"
+    tag: "22-c4235581" # ← Jenkins CI writes: "<BUILD_NUMBER>-<GIT_SHORT_SHA>"
   replicaCount: 1
-
 backend:
   image:
     repository: rohankhanal14/crud-backend
-    tag: "latest"   # ← Jenkins CI writes: "<BUILD_NUMBER>-<GIT_SHORT_SHA>"
+    tag: "latest" # ← Jenkins CI writes: "<BUILD_NUMBER>-<GIT_SHORT_SHA>"
   replicaCount: 1
   env:
     corsOrigin: "http://staging.crud.local"
-
 mongodb:
   storage: 5Gi
-
 ingress:
   host: staging.crud.local
