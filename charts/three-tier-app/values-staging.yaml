@@ -10,7 +10,7 @@ global:
 frontend:
   image:
     repository: rohankhanal14/crud-frontend
-    tag: "22-c4235581" # ← Jenkins CI writes: "<BUILD_NUMBER>-<GIT_SHORT_SHA>"
+    tag: "23-96a641ea" # ← Jenkins CI writes: "<BUILD_NUMBER>-<GIT_SHORT_SHA>"
   replicaCount: 1
 backend:
   image:
