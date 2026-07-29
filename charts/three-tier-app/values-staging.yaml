@@ -3,7 +3,7 @@ global:
 frontend:
   image:
     repository: rohankhanal14/crud-frontend
-    tag: 5-23f87fd9
+    tag: 6-23f87fd9
   replicaCount: 1
 backend:
   image:
