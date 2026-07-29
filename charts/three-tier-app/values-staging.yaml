@@ -8,7 +8,7 @@ frontend:
 backend:
   image:
     repository: rohankhanal14/crud-backend
-    tag: 21-23f87fd9
+    tag: 22-23f87fd9
   replicaCount: 1
   env:
     corsOrigin: http://staging.crud.local
