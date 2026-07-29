@@ -1,24 +1,17 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# Staging Values — Jenkins CI updates frontend.image and backend.image
-# on every successful build to main/develop branch.
-#
-# DO NOT edit image tags manually — let the CI pipeline manage them.
-# ─────────────────────────────────────────────────────────────────────────────
-
 global:
   environment: staging
 frontend:
   image:
     repository: rohankhanal14/crud-frontend
-    tag: "26-b595da14" # ← Jenkins CI writes: "<BUILD_NUMBER>-<GIT_SHORT_SHA>"
+    tag: 26-b595da14
   replicaCount: 1
 backend:
   image:
     repository: rohankhanal14/crud-backend
-    tag: "latest" # ← Jenkins CI writes: "<BUILD_NUMBER>-<GIT_SHORT_SHA>"
+    tag: 21-23f87fd9
   replicaCount: 1
   env:
-    corsOrigin: "http://staging.crud.local"
+    corsOrigin: http://staging.crud.local
 mongodb:
   storage: 5Gi
 ingress:
